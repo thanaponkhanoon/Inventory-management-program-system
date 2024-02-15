@@ -31,8 +31,8 @@ function CustomerEdit({ Cancle, Data }: Customer) {
         Partial<CustomerInterface>
     >({
         ID: Data?.ID,
-        Customer_id: Data?.Customer_id,
-        Custome_name: Data?.Custome_name,
+        Cus_id: Data?.Cus_id,
+        Cus_name: Data?.Cus_name,
     });
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(false);
@@ -65,8 +65,8 @@ function CustomerEdit({ Cancle, Data }: Customer) {
     function submit() {
         let data = {
             ID: Number(customer.ID),
-            Customer_id: customer.Customer_id ?? "",
-            Custome_name: customer.Custome_name ?? "",
+            Cus_id: customer.Cus_id ?? "",
+            Cus_name: customer.Cus_name ?? "",
         };
         console.log(data);
 
@@ -146,11 +146,11 @@ function CustomerEdit({ Cancle, Data }: Customer) {
                         <FormControl fullWidth variant="standard">
                             <p>รหัสลูกค้า</p>
                             <TextField
-                                id="Customer_id"
+                                id="Cus_id"
                                 variant="standard"
                                 type="string"
                                 size="medium"
-                                value={customer.Customer_id || ""}
+                                value={customer.Cus_id || ""}
                                 onChange={handleInputChange}
                             />
                         </FormControl>
@@ -160,11 +160,11 @@ function CustomerEdit({ Cancle, Data }: Customer) {
                         <FormControl fullWidth variant="standard">
                             <p>ชื่อลูกค้า</p>
                             <TextField
-                                id="Custome_name"
+                                id="Cus_name"
                                 variant="standard"
                                 type="string"
                                 size="medium"
-                                value={customer.Custome_name || ""}
+                                value={customer.Cus_name || ""}
                                 onChange={handleInputChange}
                             />
                         </FormControl>

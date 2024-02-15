@@ -1,20 +1,19 @@
 import React from "react";
 import { useEffect, useState, useCallback } from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { Link as RouterLink } from "react-router-dom";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { Link as RouterLink } from "react-router-dom";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogTitle from "@mui/material/DialogTitle";
-import { ProductInterface } from "../models/IProduct";
-import ProductEdit from './ProductEdit';
+import { DetailInterface } from "../models/IDetail";
+import DetailEdit from "./DetailEdit";
+import moment from "moment";
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     props,
 
@@ -23,27 +22,28 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-function Product() {
-    const [product, setProduct] = useState<
-        ProductInterface[]
+function DetailPrint() {
+    const [detail, setDetail] = useState<
+        DetailInterface[]
     >([]);
 
     const [selectcellData, setSelectcellData] =
-        useState<ProductInterface>();
-    const [success, setSuccess] = useState(false);
+        useState<DetailInterface>();
+    const [success, setSuccess] = useState(false); //จะยังไม่ให้แสดงบันทึกข้อมูล
     const [error, setError] = useState(false);
     const [opendelete, setOpenDelete] = useState(false);
     const [openedit, setOpenEdit] = useState(false);
 
     const handleCellFocus = useCallback(
+        //การเรียกใช้ระหว่าง component
         (event: React.FocusEvent<HTMLDivElement>) => {
             const row = event.currentTarget.parentElement;
             const id = row?.dataset.id;
-            const selectedProduct = product.find((v) => Number(v.ID) === Number(id));
-            console.log(selectedProduct);
-            setSelectcellData(selectedProduct);
+            const selectedDetail = detail.find((v) => Number(v.ID) === Number(id));
+            console.log(selectedDetail);
+            setSelectcellData(selectedDetail);
         },
-        [product]
+        [detail]
     );
     const handleClose = (
         event?: React.SyntheticEvent | Event,
@@ -61,15 +61,9 @@ function Product() {
     };
     const handleClickDelete = () => {
         // setSelectCell(selectcell);
-        DeleteProduct(Number(selectcellData?.ID));
+        DeleteDetail(Number(selectcellData?.ID));
 
         setOpenDelete(false);
-    };
-    const handleDelete = () => {
-        setOpenDelete(true);
-    };
-    const handleEdit = () => {
-        setOpenEdit(true);
     };
 
     const handleDeleteClose = () => {
@@ -78,32 +72,35 @@ function Product() {
     const handleEditClose = () => {
         setOpenEdit(false);
     };
-    const DeleteProduct = async (id: Number) => {
-        const apiUrl = `http://localhost:8080/product/${id}`;
+    const handlePrint = () => {
+        window.print();
+    };
+    const DeleteDetail = async (id: Number) => {
+        const apiUrl = `http://localhost:8080/detail/${id}`;
         const requestOptions = {
             method: "DELETE",
-          };
-      
-          fetch(apiUrl, requestOptions)
+        };
+
+        fetch(apiUrl, requestOptions)
             .then((response) => response.json())
-      
+
             .then((res) => {
-              //ตรงนี้คือลบในดาต้าเบสสำเร็จแล้ว
-              if (res.data) {
-                setSuccess(true);
-                const remove = product.filter(
-                  //กรองเอาข้อมูลที่ไม่ได้ลบ
-                  (perv) => perv.ID !== selectcellData?.ID
-                );
-                setProduct(remove);
-              } else {
-                setError(true);
-              }
+                //ตรงนี้คือลบในดาต้าเบสสำเร็จแล้ว
+                if (res.data) {
+                    setSuccess(true);
+                    const remove = detail.filter(
+                        //กรองเอาข้อมูลที่ไม่ได้ลบ
+                        (perv) => perv.ID !== selectcellData?.ID
+                    );
+                    setDetail(remove);
+                } else {
+                    setError(true);
+                }
             });
     };
 
-    const GetAllProduct = async () => {
-        const apiUrl = "http://localhost:8080/product";
+    const GetAllDetail = async () => {
+        const apiUrl = "http://localhost:8080/detail";
 
         const requestOptions = {
             method: "GET",
@@ -116,64 +113,77 @@ function Product() {
                 console.log(res.data);
 
                 if (res.data) {
-                    setProduct(res.data);
+                    setDetail(res.data);
                 }
             });
     };
 
     const columns: GridColDef[] = [
+        { field: "ID", headerName: "ลำดับ", width: 20 },
         {
-            field: "Product_id",
-            headerName: "รหัสสินค้า",
-            width: 130,
+            field: "Customerdetails",
+            headerName: "รายละเอียดลูกค้า",
+            width: 200,
+            valueGetter: (params) => {
+                const cusId = params.row.Customer.Cus_id;
+                const cusName = params.row.Customer.Cus_name;
+                return `${cusId} - ${cusName}`;
+            },
         },
         {
-            field: "Product_name",
+            field: "Productdetails",
             headerName: "รายละเอียดสินค้า",
-            width: 130
+            width: 200,
+            valueGetter: (params) => {
+                const ProductId = params.row.Product.Product_id;
+                const ProductName = params.row.Product.Product_name;
+                return `${ProductId} - ${ProductName}`;
+            },
         },
+        {
+            field: "Order_date",
+            headerName: "วันที่สั่ง",
+            width: 120,
+            valueGetter: (params) => {
+                return moment(params.row.Header.Order_date).format('DD/MM/YYYY');
+            },
+        },
+        {
+            field: "Order_no",
+            headerName: "เลขที่สั่ง",
+            width: 80,
+            valueGetter: (params) => {
+                return params.row.Header.Order_no;
+            },
+        },
+        {
+            field: "Ord_date",
+            headerName: "วันกำหนดส่ง",
+            width: 120,
+            valueFormatter: (params) => moment(params.value.Ord_date).format('DD/MM/YYYY')
+        },
+        { field: "Amount", headerName: "จำนวนที่สั่ง", width: 100 },
         {
             field: "Cost_unit",
-            headerName: "ราตา/หน่วย",
-            width: 80
+            headerName: "ราคา/หน่วย",
+            width: 100,
+            valueGetter: (params) => {
+                return params.row.Product.Cost_unit;
+            },
         },
-        {
-            field: "actions",
-            headerName: "การจัดการข้อมูล",
-            width: 175,
-            renderCell: () => (
-                <div>
-                    <Button
-                        onClick={handleEdit}
-                        variant="contained"
-                        size="small"
-                        startIcon={<EditIcon />}
-                        color="success"
-                    >
-                        แก้ไข
-                    </Button>
-                    &nbsp;&nbsp;&nbsp;
-                    <Button
-                        onClick={handleDelete}
-                        variant="contained"
-                        size="small"
-                        startIcon={<DeleteIcon />}
-                        color="error"
-                    >
-                        ลบ
-                    </Button>
-                </div>
-            ),
-        },
+        { field: "TOT_PRC", headerName: "ราคารวม", width: 100 },
     ];
 
     useEffect(() => {
-        GetAllProduct();
+        GetAllDetail();
     }, []);
+
+    const sumTOT_PRC = detail.reduce((total, current) => total + current.TOT_PRC, 0);
+    console.log(sumTOT_PRC);
 
     return (
         <div>
-            <Container maxWidth="sm">
+            <Container maxWidth="lg">
                 <Snackbar
                     open={success}
                     autoHideDuration={6000}
@@ -215,7 +225,7 @@ function Product() {
                     aria-describedby="alert-dialog-description"
                 >
                     <DialogActions>
-                        <ProductEdit
+                        <DetailEdit
                             Cancle={handleEditClose}
                             Data={selectcellData}
                         />
@@ -234,25 +244,25 @@ function Product() {
                             color="primary"
                             gutterBottom
                         >
-                            บันทึก/แก้ไข ข้อมูลสินค้า
+                            รายงานแสดงข้อมูลที่ครบกำหนดส่งสินค้าแล้วยังไม่ได้ส่งสินค้า
                         </Typography>
                     </Box>
 
-                    <Box>
+                    {/* <Box>
                         <Button
                             component={RouterLink}
-                            to="/productcreate"
+                            to="/headercreate"
                             variant="contained"
                             color="primary"
                         >
-                            เพิ่มสินค้า
+                            เพิ่มข้อมูลการสั่งซื้อสั่งซื้อสินค้า
                         </Button>
-                    </Box>
+                    </Box> */}
                 </Box>
 
                 <div style={{ height: 300, width: "100%", marginTop: "20px" }}>
                     <DataGrid
-                        rows={product}
+                        rows={detail}
                         getRowId={(row) => row.ID}
                         columns={columns}
                         initialState={{
@@ -268,12 +278,35 @@ function Product() {
                                 onFocus: handleCellFocus,
                             },
                         }}
-                        
+
                     />
                 </div>
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Typography variant="h6" color="primary" gutterBottom>
+                        รวม:
+                    </Typography>
+                    <Typography variant="h6" color="primary" gutterBottom style={{ textAlign: "right" }}>
+                        {sumTOT_PRC}
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                    </Typography>
+                </Box>
+                <Button
+                    style={{ float: "right" }}
+                    component={RouterLink}
+                    to="/"
+                    variant="contained"
+                    color="warning"
+                >
+                    ออก
+                </Button>
+                <Button style={{ float: "right" }} onClick={handlePrint} variant="contained" color="secondary">
+                    พิมพ์
+                </Button>
             </Container>
         </div>
     );
 }
 
-export default Product;
+export default DetailPrint;

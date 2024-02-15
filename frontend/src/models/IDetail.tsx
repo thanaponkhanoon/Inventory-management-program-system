@@ -1,3 +1,4 @@
+import { CustomerInterface } from "./ICustomer";
 import { HeaderInterface } from "./IHeader";
 import { ProductInterface } from "./IProduct";
 
@@ -7,8 +8,10 @@ export interface DetailInterface{
     Header:         HeaderInterface,
     ProductID:      number,
     Product:        ProductInterface
-    Ord_date:       Date,
-    Fin_date:       Date,
+    CustomerID:     number,
+    Customer:       CustomerInterface,
+    Ord_date:       Date | null,
+    Fin_date:       Date | null,
     Amount:         number,
     TOT_PRC:        number,
 }

@@ -82,7 +82,7 @@ func UpdateHeader(c *gin.Context){
 	c.JSON(http.StatusOK, gin.H{"data": header})
 }
 
-func DeleteHeader(c *gin.Context) {
+func DeleteHeaderByID(c *gin.Context) {
 	Id := c.Param("id")
 	if tx := entity.DB().Delete(&entity.Header{}, Id); tx.RowsAffected == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "header ID not found"})

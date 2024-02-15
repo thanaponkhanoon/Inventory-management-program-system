@@ -3,7 +3,7 @@ package controller
 import (
 	"fmt"
 	"net/http"
-
+	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 	"github.com/thanaponkhanoon/Inventory-management-program-system/entity"
 )
@@ -20,6 +20,11 @@ func CreateProduct(c *gin.Context){
 		Product_id: 	product.Product_id,
 		Product_name: 	product.Product_name,
 		Cost_unit: 		product.Cost_unit,
+	}
+
+	if _, err := govalidator.ValidateStruct(product); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	if err := entity.DB().Create(&PD).Error; err != nil {
@@ -64,7 +69,10 @@ func UpdateProduct(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
+	if _, err := govalidator.ValidateStruct(product); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"data": product})
 }
 

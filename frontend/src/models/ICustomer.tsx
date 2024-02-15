@@ -1,5 +1,5 @@
 export interface CustomerInterface{
     ID:             number,
-    Customer_id:    string,
-    Custome_name:  string,
+    Cus_id:    string,
+    Cus_name:   string,
 }

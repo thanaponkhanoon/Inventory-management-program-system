@@ -16,13 +16,33 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemIcon from "@mui/material/ListItemIcon";
+import InventoryIcon from '@mui/icons-material/Inventory';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import SupportAgentIcon from '@mui/icons-material/SupportAgent';
+import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
+import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
+import BorderColorIcon from '@mui/icons-material/BorderColor';
+import StorefrontIcon from '@mui/icons-material/Storefront';
+import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
+import FolderIcon from '@mui/icons-material/Folder';
 
 const menu = [
   { name: "หน้าแรก", icon: <HomeIcon />, path: "/" },
+  { name: "สินค้า", icon: <InventoryIcon />, path: "/product" },
+  { name: "เพิ่มข้้อมูลสินค้า", icon: <ShoppingCartIcon />, path: "/productcreate" },
+  { name: "ลูกค้า", icon: <SupportAgentIcon  />, path: "/customer" },
+  { name: "เพิ่มข้้อมูลลูกค้า", icon: <PersonAddAlt1Icon />, path: "/customercreate" },
+  { name: "เลขที่สั่ง", icon: <FormatListNumberedIcon />, path: "/header" },
+  { name: "เพิ่มเลขที่สั่ง", icon: <BorderColorIcon />, path: "/headercreate" },
+  { name: "ข้อมูลเลขที่สั่ง", icon: <StorefrontIcon />, path: "/customer" },
+  { name: "ข้อมูล", icon: <FolderIcon/>, path: "/detail" },
+  { name: "เพิ่มข้อมูล", icon: <CreateNewFolderIcon />, path: "/detailcreate" },
+  { name: "มาสเตอร์", icon: <AssessmentIcon />, path: "/master" },
 ];
 
 function Navbar() {
@@ -130,8 +150,8 @@ function Navbar() {
                 'aria-labelledby': 'basic-button',
               }}
             >
-              <MenuItem component={RouterLink} to="/order" onClick={handleClose1}>บันทึก/แก้ไข การสั่งซื้อสินค้า</MenuItem>
-              <MenuItem component={RouterLink} to="/process" onClick={handleClose1}>การประมวลผลข้อมูลการสั่งซื้อ</MenuItem>
+              <MenuItem component={RouterLink} to="/headerdetail" onClick={handleClose1}>บันทึก/แก้ไข การสั่งซื้อสินค้า</MenuItem>
+              <MenuItem component={RouterLink} to="/detailprint" onClick={handleClose1}>การประมวลผลข้อมูลการสั่งซื้อ</MenuItem>
             </Menu>
           </div>
           <div>

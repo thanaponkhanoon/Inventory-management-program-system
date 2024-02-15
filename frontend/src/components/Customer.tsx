@@ -83,23 +83,23 @@ function Customer() {
         const apiUrl = `http://localhost:8080/customer/${id}`;
         const requestOptions = {
             method: "DELETE",
-          };
-      
-          fetch(apiUrl, requestOptions)
+        };
+
+        fetch(apiUrl, requestOptions)
             .then((response) => response.json())
-      
+
             .then((res) => {
-              //ตรงนี้คือลบในดาต้าเบสสำเร็จแล้ว
-              if (res.data) {
-                setSuccess(true);
-                const remove = customer.filter(
-                  //กรองเอาข้อมูลที่ไม่ได้ลบ
-                  (perv) => perv.ID !== selectcellData?.ID
-                );
-                setCustomer(remove);
-              } else {
-                setError(true);
-              }
+                //ตรงนี้คือลบในดาต้าเบสสำเร็จแล้ว
+                if (res.data) {
+                    setSuccess(true);
+                    const remove = customer.filter(
+                        //กรองเอาข้อมูลที่ไม่ได้ลบ
+                        (perv) => perv.ID !== selectcellData?.ID
+                    );
+                    setCustomer(remove);
+                } else {
+                    setError(true);
+                }
             });
     };
 
@@ -123,14 +123,13 @@ function Customer() {
     };
 
     const columns: GridColDef[] = [
-        { field: "ID", headerName: "ลำดับ", width: 70 },
         {
-            field: "Customer_id",
+            field: "Cus_id",
             headerName: "รหัสลูกค้า",
             width: 120,
         },
         {
-            field: "Custome_name",
+            field: "Cus_name",
             headerName: "ชื่อลูกค้า",
             width: 150
         },
@@ -231,7 +230,7 @@ function Customer() {
                             color="primary"
                             gutterBottom
                         >
-                            การบันทึก/แก้ไข ข้อมูลลูกค้า
+                            บันทึก/แก้ไข ข้อมูลลูกค้า
                         </Typography>
                     </Box>
 
@@ -265,7 +264,7 @@ function Customer() {
                                 onFocus: handleCellFocus,
                             },
                         }}
-                        
+
                     />
                 </div>
             </Container>

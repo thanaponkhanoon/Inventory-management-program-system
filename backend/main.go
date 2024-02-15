@@ -29,19 +29,19 @@ func main() {
 	r.GET("/detail/:id", controller.GetDetailByID)
 	r.POST("/detail", controller.CreateDetail)
 	r.PATCH("/detail", controller.UpdateDetail)
-	r.DELETE("/detail/:id", controller.DeleteDetail)
+	r.DELETE("/detail/:id", controller.DeleteDetailByID)
 	//Header
 	r.GET("/header", controller.GetAllHeader)
 	r.GET("/header/:id", controller.GetHeaderByID)
 	r.POST("/header", controller.CreateHeader)
 	r.PATCH("/header", controller.UpdateHeader)
-	r.DELETE("/header/:id", controller.DeleteHeader)
+	r.DELETE("/header/:id", controller.DeleteHeaderByID)
 	//Customer
 	r.GET("/customer", controller.GetAllCustomer)
 	r.GET("/customer/:id", controller.GetCustomerByID)
 	r.POST("/customer", controller.CreateCustomer)
 	r.PATCH("/customer", controller.UpdateCustomer)
-	r.DELETE("/customer/:id", controller.DeleteCustomer)
+	r.DELETE("/customer/:id", controller.DeleteCustomerByID)
 	//Product
 	r.GET("/product", controller.GetAllProduct)
 	r.GET("/product/:id", controller.GetProductByID)

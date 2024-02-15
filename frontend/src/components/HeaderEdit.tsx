@@ -1,5 +1,4 @@
 import React from "react";
-import { Link as RouterLink } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import FormControl from "@mui/material/FormControl";
@@ -11,9 +10,13 @@ import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
-import { useState } from "react";
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import { useEffect, useState } from "react";
+import { HeaderInterface } from "../models/IHeader";
 import { CustomerInterface } from "../models/ICustomer";
-
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     props,
@@ -23,11 +26,23 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-function CustomerCreate() {
-    const [customer, setCustomer] = useState<
-        Partial<CustomerInterface>
-    >({}); //Partial ชิ้นส่วนเอาไว้เซทข้อมูลที่ละส่วน
-    const [success, setSuccess] = useState(false); //จะยังไม่ให้แสดงบันทึกข้อมูล
+interface Header {
+    Cancle: () => void;
+    Data: HeaderInterface | undefined;
+}
+
+function HeaderEdit({ Cancle, Data }: Header) {
+    const [order_date, setOrder_date] = useState<Date | null>();
+    const [header, setHeader] = useState<
+        Partial<HeaderInterface>
+    >({
+        ID: Data?.ID,
+        Order_no: Data?.Order_no,
+        CustomerID: Data?.CustomerID,
+        Order_date: Data?.Order_date
+    });
+    const [customer, setCustomer] = useState<CustomerInterface[]>([]);
+    const [success, setSuccess] = useState(false);
     const [error, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
 
@@ -49,30 +64,33 @@ function CustomerCreate() {
     const handleInputChange = (
         event: React.ChangeEvent<{ id?: string; value: any }> //ชื่อคอมลัมน์คือ id และค่าที่จะเอามาใส่ไว้ในคอมลัมน์นั้นคือ value
     ) => {
-        const id = event.target.id as keyof typeof customer; //
-        // console.log(event.target.id);
-        // console.log(event.target.value);
-
+        const id = event.target.id as keyof typeof header;
         const { value } = event.target;
+        setHeader({ ...header, [id]: value });
+    };
 
-        setCustomer({ ...customer, [id]: value });
+    const handleChange = (event: SelectChangeEvent<number>) => {
+        const name = event.target.name as keyof typeof header;
+        const { value } = event.target;
+        setHeader({ ...header, [name]: value });
     };
 
     function submit() {
         let data = {
-            //เก็บข้อมูลที่จะเอาไปเก็บในดาต้าเบส
-            Cus_id: customer.Cus_id ?? "",
-            Cus_name: customer.Cus_name ?? "",
+            ID: Number(header.ID),
+            Order_no: Number(header.Order_no) ?? "",
+            CustomerID: Number(header.CustomerID),
+            Order_date: order_date?.toISOString(),
+
         };
         console.log(data);
 
-        const apiUrl = "http://localhost:8080/customer";
+        const apiUrl = "http://localhost:8080/header";
         const requestOptions = {
-            method: "POST", //เอาข้อมูลไปเก็บไว้ในดาต้าเบส
+            method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
             },
-
             body: JSON.stringify(data),
         };
 
@@ -92,6 +110,28 @@ function CustomerCreate() {
                 }
             });
     }
+    const requestOptions = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    };
+    const GetAllCustomer = async () => {
+        const apiUrl = "http://localhost:8080/customer";
+
+        fetch(apiUrl, requestOptions)
+            .then((response) => response.json())
+
+            .then((res) => {
+                console.log(res.data);
+                if (res.data) {
+                    setCustomer(res.data);
+                }
+            });
+    };
+    useEffect(() => {
+        GetAllCustomer();
+    }, []);
 
     return (
         <Container maxWidth="md">
@@ -131,22 +171,48 @@ function CustomerCreate() {
                             color="primary"
                             gutterBottom
                         >
-                            การบันทึก ข้อมูลลูกค้า
+                            การบันทึก/แก้ไข การสั่งซื้อสินค้า
                         </Typography>
                     </Box>
                 </Box>
 
                 <Divider />
                 <Grid container spacing={3} sx={{ padding: 2 }}>
-                    <Grid item xs={6}>
+
+                <Grid item xs={10}>
                         <FormControl fullWidth variant="standard">
-                            <p>รหัสลูกค้า</p>
+                            <p>รหัสและชื่อ ลูกค้า</p>
+                            <Select
+                                native
+                                value={header.CustomerID}
+                                onChange={handleChange}
+                                inputProps={{
+                                    name: "CustomerID", //เอาไว้เข้าถึงข้อมูล
+                                }}
+                            >
+                                <option aria-label="None" value=""></option>
+                                {customer.map(
+                                    (
+                                        item: CustomerInterface //map
+                                    ) => (
+                                        <option value={item.ID} key={item.ID}>
+                                            รหัสลูกค้า {item.Cus_id} ชื่อลูกค้า {item.Cus_name}
+                                        </option>
+                                    )
+                                )}
+                            </Select>
+                        </FormControl>
+                    </Grid>
+
+                    <Grid item xs={2}>
+                        <FormControl fullWidth variant="standard">
+                            <p>ลำดับ</p>
                             <TextField
-                                id="Cus_id"
+                                id="Order_no"
                                 variant="standard"
-                                type="string"
+                                type="number"
                                 size="medium"
-                                value={customer.Cus_id || ""}
+                                value={header.Order_no || ""}
                                 onChange={handleInputChange}
                             />
                         </FormControl>
@@ -154,36 +220,32 @@ function CustomerCreate() {
 
                     <Grid item xs={6}>
                         <FormControl fullWidth variant="standard">
-                            <p>ชื่อลูกค้า</p>
-                            <TextField
-                                id="Cus_name"
-                                variant="standard"
-                                type="string"
-                                size="medium"
-                                value={customer.Cus_name || ""}
-                                onChange={handleInputChange}
-                            />
+                            <p>วันที่สั่งซื้อสินค้า</p>
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <DatePicker
+                                    label="วันที่สั่งซื้อ"
+                                    value={order_date}
+                                    onChange={(date) => setOrder_date(date)}
+                                />
+                            </LocalizationProvider>
                         </FormControl>
                     </Grid>
 
                     <Grid item xs={12}>
                         <Button
-                            component={RouterLink}
-                            to="/customer"
                             variant="contained"
+                            onClick={Cancle}
                         >
                             กลับ
                         </Button>
 
                         <Button
-                            component={RouterLink}
-                            to="/customer"
                             style={{ float: "right" }}
                             onClick={submit}
                             variant="contained"
                             color="success"
                         >
-                            บันทึกข้อูลสินค้า
+                            บันทึกการจัดซื้อ
                         </Button>
                     </Grid>
                 </Grid>
@@ -191,5 +253,4 @@ function CustomerCreate() {
         </Container>
     );
 }
-
-export default CustomerCreate;
+export default HeaderEdit;

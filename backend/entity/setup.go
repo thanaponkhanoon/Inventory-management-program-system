@@ -59,21 +59,21 @@ func SetupDatabase() {
 
 	// Product
 	product1 := Product{
-		Product_id:		"id1",
+		Product_id:		"id12345678",
 		Product_name: 	"Net",
 		Cost_unit: 		2,
 	}
 	db.Model(&Product{}).Create(&product1)
 	
 	product2 := Product{
-		Product_id:		"id2",
+		Product_id:		"id22345678",
 		Product_name: 	"Stew",
 		Cost_unit: 		2,
 	}
 	db.Model(&Product{}).Create(&product2)
 	
 	product3 := Product{
-		Product_id:		"id3",
+		Product_id:		"id32345678",
 		Product_name: 	"Fishnet",
 		Cost_unit: 		2,
 	}
@@ -81,20 +81,20 @@ func SetupDatabase() {
 
 	// Customer
 	customer1 := Customer{
-		Customer_id: 	"id1",
-		Custome_name: 	"Jaidee",
+		Cus_id: 	"id48952173",
+		Cus_name: 	"Jaidee",
 	}
 	db.Model(&Customer{}).Create(&customer1)
 
 	customer2 := Customer{
-		Customer_id: 	"id2",
-		Custome_name: 	"Manee",
+		Cus_id: 	"id28954746",
+		Cus_name: 	"Manee",
 	}
 	db.Model(&Customer{}).Create(&customer2)
 	
 	customer3 := Customer{
-		Customer_id: 	"id3",
-		Custome_name: 	"Malee",
+		Cus_id: 	"id37896542",
+		Cus_name: 	"Malee",
 	}
 	db.Model(&Customer{}).Create(&customer3)
 	
@@ -124,33 +124,33 @@ func SetupDatabase() {
 	detail1 := Detail{
 		Header: 		header1,
 		Product: 		product1,
+		Customer: 		customer1,
 		Ord_date: 		time.Now(),
-		Fin_date: 		time.Now(),
+		Fin_date: 		time.Now().AddDate(+0, +0, +7),
 		Amount: 		2,
-		Cost_unit: 		2,
-		TOT_PRC: 		2,
+		TOT_PRC: 		calculateTOTPRC(2, 2),
 	}
 	db.Model(&Detail{}).Create(&detail1)
 
 	detail2 := Detail{
 		Header: 		header2,
 		Product: 		product2,
+		Customer: 		customer2,
 		Ord_date: 		time.Now(),
-		Fin_date: 		time.Now(),
+		Fin_date: 		time.Now().AddDate(+0, +0, +7),
 		Amount: 		2,
-		Cost_unit: 		2,
-		TOT_PRC: 		2,
+		TOT_PRC: 		calculateTOTPRC(2, 2),
 	}
 	db.Model(&Detail{}).Create(&detail2)
 
 	detail3 := Detail{
 		Header: 		header3,
 		Product: 		product3,
+		Customer: 		customer3,
 		Ord_date: 		time.Now(),
-		Fin_date: 		time.Now(),
+		Fin_date: 		time.Now().AddDate(+0, +0, +7),
 		Amount: 		2,
-		Cost_unit: 		2,
-		TOT_PRC: 		2,
+		TOT_PRC: 		calculateTOTPRC(2, 2),
 	}
 	db.Model(&Detail{}).Create(&detail3)
 
@@ -187,4 +187,8 @@ func SetupDatabase() {
 		Cost_tot: 		2,
 	}
 	db.Model(&Master{}).Create(&master3)
+}
+
+func calculateTOTPRC(amount, costUnit int) int {
+    return amount * costUnit
 }

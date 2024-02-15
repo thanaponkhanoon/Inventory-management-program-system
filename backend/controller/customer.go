@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 	"github.com/thanaponkhanoon/Inventory-management-program-system/entity"
 )
@@ -16,8 +17,13 @@ func CreateCustomer(c *gin.Context){
 	}
 
 	CT := entity.Customer{
-		Customer_id:	customer.Customer_id,
-		Custome_name: 	customer.Custome_name,
+		Cus_id:		customer.Cus_id,
+		Cus_name: 	customer.Cus_name,
+	}
+
+	if _, err := govalidator.ValidateStruct(customer); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	if err := entity.DB().Create(&CT).Error; err != nil {
@@ -61,11 +67,15 @@ func UpdateCustomer(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	if _, err := govalidator.ValidateStruct(customer); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"data": customer})
 }
 
-func DeleteCustomer(c *gin.Context) {
+func DeleteCustomerByID(c *gin.Context) {
 	Id := c.Param("id")
 	if tx := entity.DB().Delete(&entity.Customer{}, Id); tx.RowsAffected == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "customer ID not found"})

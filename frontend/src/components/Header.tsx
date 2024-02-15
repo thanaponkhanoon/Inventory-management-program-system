@@ -13,8 +13,9 @@ import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogTitle from "@mui/material/DialogTitle";
-import { ProductInterface } from "../models/IProduct";
-import ProductEdit from './ProductEdit';
+import moment from "moment";
+import { HeaderInterface } from "../models/IHeader";
+import HeaderEdit from "./HeaderEdit";
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     props,
 
@@ -23,27 +24,28 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-function Product() {
-    const [product, setProduct] = useState<
-        ProductInterface[]
+function Header() {
+    const [header, setHeader] = useState<
+        HeaderInterface[]
     >([]);
 
     const [selectcellData, setSelectcellData] =
-        useState<ProductInterface>();
-    const [success, setSuccess] = useState(false);
+        useState<HeaderInterface>();
+    const [success, setSuccess] = useState(false); //จะยังไม่ให้แสดงบันทึกข้อมูล
     const [error, setError] = useState(false);
     const [opendelete, setOpenDelete] = useState(false);
     const [openedit, setOpenEdit] = useState(false);
 
     const handleCellFocus = useCallback(
+        //การเรียกใช้ระหว่าง component
         (event: React.FocusEvent<HTMLDivElement>) => {
             const row = event.currentTarget.parentElement;
             const id = row?.dataset.id;
-            const selectedProduct = product.find((v) => Number(v.ID) === Number(id));
-            console.log(selectedProduct);
-            setSelectcellData(selectedProduct);
+            const selectedHeader = header.find((v) => Number(v.ID) === Number(id));
+            console.log(selectedHeader);
+            setSelectcellData(selectedHeader);
         },
-        [product]
+        [header]
     );
     const handleClose = (
         event?: React.SyntheticEvent | Event,
@@ -61,7 +63,7 @@ function Product() {
     };
     const handleClickDelete = () => {
         // setSelectCell(selectcell);
-        DeleteProduct(Number(selectcellData?.ID));
+        DeleteHeader(Number(selectcellData?.ID));
 
         setOpenDelete(false);
     };
@@ -78,32 +80,32 @@ function Product() {
     const handleEditClose = () => {
         setOpenEdit(false);
     };
-    const DeleteProduct = async (id: Number) => {
-        const apiUrl = `http://localhost:8080/product/${id}`;
+    const DeleteHeader = async (id: Number) => {
+        const apiUrl = `http://localhost:8080/header/${id}`;
         const requestOptions = {
             method: "DELETE",
-          };
-      
-          fetch(apiUrl, requestOptions)
+        };
+
+        fetch(apiUrl, requestOptions)
             .then((response) => response.json())
-      
+
             .then((res) => {
-              //ตรงนี้คือลบในดาต้าเบสสำเร็จแล้ว
-              if (res.data) {
-                setSuccess(true);
-                const remove = product.filter(
-                  //กรองเอาข้อมูลที่ไม่ได้ลบ
-                  (perv) => perv.ID !== selectcellData?.ID
-                );
-                setProduct(remove);
-              } else {
-                setError(true);
-              }
+                //ตรงนี้คือลบในดาต้าเบสสำเร็จแล้ว
+                if (res.data) {
+                    setSuccess(true);
+                    const remove = header.filter(
+                        //กรองเอาข้อมูลที่ไม่ได้ลบ
+                        (perv) => perv.ID !== selectcellData?.ID
+                    );
+                    setHeader(remove);
+                } else {
+                    setError(true);
+                }
             });
     };
 
-    const GetAllProduct = async () => {
-        const apiUrl = "http://localhost:8080/product";
+    const GetAllHeader = async () => {
+        const apiUrl = "http://localhost:8080/header";
 
         const requestOptions = {
             method: "GET",
@@ -116,26 +118,38 @@ function Product() {
                 console.log(res.data);
 
                 if (res.data) {
-                    setProduct(res.data);
+                    setHeader(res.data);
                 }
             });
     };
 
     const columns: GridColDef[] = [
         {
-            field: "Product_id",
-            headerName: "รหัสสินค้า",
-            width: 130,
+            field: "Order_no",
+            headerName: "ลำดับ",
+            width: 80,
         },
         {
-            field: "Product_name",
-            headerName: "รายละเอียดสินค้า",
-            width: 130
+            field: "Cus_id",
+            headerName: "รหัสลูกค้า",
+            width: 225,
+            valueGetter: (params) => {
+                return params.row.Customer.Cus_id;
+            },
         },
         {
-            field: "Cost_unit",
-            headerName: "ราตา/หน่วย",
-            width: 80
+            field: "Cus_name",
+            headerName: "ชื่อลูกค้า",
+            width: 225,
+            valueGetter: (params) => {
+                return params.row.Customer.Cus_name;
+            },
+        },
+        {
+            field: "Order_date",
+            headerName: "วันที่สั่ง",
+            width: 120,
+            valueFormatter: (params) => moment(params.value.Order_date).format('DD/MM/YYYY')
         },
         {
             field: "actions",
@@ -168,12 +182,12 @@ function Product() {
     ];
 
     useEffect(() => {
-        GetAllProduct();
+        GetAllHeader();
     }, []);
 
     return (
         <div>
-            <Container maxWidth="sm">
+            <Container maxWidth="md">
                 <Snackbar
                     open={success}
                     autoHideDuration={6000}
@@ -215,7 +229,7 @@ function Product() {
                     aria-describedby="alert-dialog-description"
                 >
                     <DialogActions>
-                        <ProductEdit
+                        <HeaderEdit
                             Cancle={handleEditClose}
                             Data={selectcellData}
                         />
@@ -234,25 +248,25 @@ function Product() {
                             color="primary"
                             gutterBottom
                         >
-                            บันทึก/แก้ไข ข้อมูลสินค้า
+                            แสดงข้อมูล การสั่งซื้อสินค้า
                         </Typography>
                     </Box>
 
                     <Box>
                         <Button
                             component={RouterLink}
-                            to="/productcreate"
+                            to="/headercreate"
                             variant="contained"
                             color="primary"
                         >
-                            เพิ่มสินค้า
+                            เพิ่มข้อมูลการสั่งซื้อสั่งซื้อสินค้า
                         </Button>
                     </Box>
                 </Box>
 
                 <div style={{ height: 300, width: "100%", marginTop: "20px" }}>
                     <DataGrid
-                        rows={product}
+                        rows={header}
                         getRowId={(row) => row.ID}
                         columns={columns}
                         initialState={{
@@ -268,7 +282,7 @@ function Product() {
                                 onFocus: handleCellFocus,
                             },
                         }}
-                        
+
                     />
                 </div>
             </Container>
@@ -276,4 +290,4 @@ function Product() {
     );
 }
 
-export default Product;
+export default Header;

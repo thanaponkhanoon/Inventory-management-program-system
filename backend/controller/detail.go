@@ -10,6 +10,7 @@ import (
 func CreateDetail(c *gin.Context){
 	var header 		entity.Header
 	var product		entity.Product
+	var customer	entity.Customer
 	var detail		entity.Detail
 
 	if err := c.ShouldBindJSON(&detail); err != nil {
@@ -27,13 +28,18 @@ func CreateDetail(c *gin.Context){
 		return
 	}
 
+	if tx := entity.DB().Where("id = ?", detail.CustomerID).First(&customer); tx.RowsAffected == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "customer not found"})
+		return
+	}
+
 	DT := entity.Detail{
 		Header: 	header,
 		Product: 	product,
+		Customer: 	customer,
 		Ord_date: 	detail.Ord_date.Local(),
 		Fin_date: 	detail.Fin_date.Local(),
 		Amount: 	detail.Amount,
-		Cost_unit: 	detail.Cost_unit,
 		TOT_PRC: 	detail.TOT_PRC,
 	}
 
@@ -46,7 +52,7 @@ func CreateDetail(c *gin.Context){
 
 func GetAllDetail(c *gin.Context){
 	var detail	[]entity.Detail
-	if err := entity.DB().Model(&entity.Detail{}).Preload("Header").Preload("Product").Find(&detail).Error; err != nil {
+	if err := entity.DB().Model(&entity.Detail{}).Preload("Header").Preload("Product").Preload("Customer").Find(&detail).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -56,7 +62,7 @@ func GetAllDetail(c *gin.Context){
 func GetDetailByID(c *gin.Context) {
 	var detail	[]entity.Detail
 	Id := c.Param("id")
-	if err := entity.DB().Model(&entity.Detail{}).Where("ID = ?", Id).Preload("Header").Preload("Product").Find(&detail); err.RowsAffected == 0 {
+	if err := entity.DB().Model(&entity.Detail{}).Where("ID = ?", Id).Preload("Header").Preload("Product").Preload("Customer").Find(&detail); err.RowsAffected == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("DetailID :  Id%s not found.", Id)})
 		return
 	}
@@ -66,6 +72,7 @@ func GetDetailByID(c *gin.Context) {
 func UpdateDetail(c *gin.Context){
 	var header 		entity.Header
 	var product		entity.Product
+	var customer	entity.Customer
 	var detail		entity.Detail
 
 	if err := c.ShouldBindJSON(&detail); err != nil {
@@ -88,6 +95,11 @@ func UpdateDetail(c *gin.Context){
 		return
 	}
 
+	if tx := entity.DB().Where("id = ?", detail.CustomerID).First(&customer); tx.RowsAffected == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "customer not found"})
+		return
+	}
+
 	detail.Ord_date = detail.Ord_date.Local()
 	detail.Fin_date = detail.Fin_date.Local() 
 
@@ -99,7 +111,7 @@ func UpdateDetail(c *gin.Context){
 	c.JSON(http.StatusOK, gin.H{"data": detail})
 }
 
-func DeleteDetail(c *gin.Context) {
+func DeleteDetailByID(c *gin.Context) {
 	Id := c.Param("id")
 	if tx := entity.DB().Delete(&entity.Detail{}, Id); tx.RowsAffected == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "detail ID not found"})
